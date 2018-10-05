@@ -15,7 +15,6 @@ UsuariosDAO.prototype.autenticar = function(usuario, req, res){
 	this._connection.open(function(err, mongoclient){
 		mongoclient.collection("usuarios", function(err, collection){
 			collection.find(usuario).toArray(function(err, result){
-				//se o array usuario não estiver vazio,iremos gerar uma session "autorizado"
 				if (result[0] != undefined) {
 
 					req.session.autorizado = true;
@@ -27,7 +26,6 @@ UsuariosDAO.prototype.autenticar = function(usuario, req, res){
 					res.redirect("jogo");
 				}else {
 					res.render("index", {validacao : {}}); 
-					// passando a var vazia,para que não de erro. Lembrando que ela é parametro do render index
 				}
 			});
 
