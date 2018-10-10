@@ -32,27 +32,44 @@ JogoDAO.prototype.iniciaJogo = function(res, usuario, casa, msg) {
 	});	
 }
 
-JogoDAO.prototype.acao = function(acao) {
-	this._connection.open(function(err, mongoclient){
-		mongoclient.collection("acao", function(err, collection){
+JogoDAO.prototype.acao = function(acao){
+    this._connection.open(function(err, mongoclient){
+        mongoclient.collection("acao", function(err, collection){
 
-			var date = new Date();
+            var date = new Date();
 
-			var tempo = null;
+            var tempo = null;
 
-			switch(parseInt(acao.acao)){
-				case 1: tempo = 1 * 60 * 60000; break;
-				case 2: tempo = 2 * 60 * 60000; break;
-				case 3: tempo = 5 * 60 * 60000; break;
-				case 4: tempo = 5 * 60 * 60000; break;
-			}
+            switch(parseInt(acao.acao)){
+                case 1: tempo = 1 * 60 * 60000; break;
+                case 2: tempo = 2 * 60 * 60000; break;
+                case 3: tempo = 5 * 60 * 60000; break;
+                case 4: tempo = 5 * 60 * 60000; break;
+            }
 
-			acao.acao_termina_em = date.getTime() + tempo;
-			collection.insert(acao);
+            acao.acao_termina_em = date.getTime() + tempo;
 
-			mongoclient.close();
-		});
-	});
+            collection.insert(acao);
+        });
+
+        mongoclient.collection("jogo", function(err, collection){
+            var moedas = null;
+            switch(parseInt(acao.acao)){
+                case 1: moedas = -2 * acao.quantidade; break;
+                case 2: moedas = -3 * acao.quantidade; break;
+                case 3: moedas = -1 * acao.quantidade; break;
+                case 4: moedas = -1 * acao.quantidade; break;
+            }
+            collection.update(
+                { usuario: acao.usuario },
+                { $inc: {
+                    moeda: moedas
+                }}
+            );
+            
+            mongoclient.close();
+        });
+    });   
 }
 
 JogoDAO.prototype.getAcoes = function(usuario, res) {
